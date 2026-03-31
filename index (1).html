@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Designové myšlení a AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#fff;color:#1a1a1a}
+@media(prefers-color-scheme:dark){body{background:#1a1a1a;color:#e8e6df}}
+:root{
+--bg-primary:#fff;--bg-secondary:#f5f4f0;--bg-tertiary:#eae9e5;
+--text-primary:#1a1a1a;--text-secondary:#6b6a65;
+--border:#d3d1c7
+}
+@media(prefers-color-scheme:dark){:root{
+--bg-primary:#1a1a1a;--bg-secondary:#2c2c2a;--bg-tertiary:#3d3d3a;
+--text-primary:#e8e6df;--text-secondary:#9c9a92;
+--border:#5f5e5a
+}}
+.dd-wrap{max-width:720px;margin:0 auto;padding:2rem 30px}
+.dd-title{font-size:20px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.dd-sub{font-size:13px;color:var(--text-secondary);margin-bottom:24px}
+.dd-phases{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px}
+.phase-card{border-radius:12px;padding:14px 12px 12px;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+.phase-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.phase-card.active{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.phase-num{font-size:11px;font-weight:500;opacity:.7;margin-bottom:2px;letter-spacing:.5px}
+.phase-name{font-size:15px;font-weight:500;margin-bottom:2px}
+.phase-label{font-size:11px;opacity:.65}
+.detail-panel{background:var(--bg-secondary);border-radius:12px;padding:20px;min-height:200px;transition:opacity .2s}
+.detail-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.detail-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;color:#fff}
+.detail-title{font-size:16px;font-weight:500;color:var(--text-primary)}
+.detail-subtitle{font-size:12px;color:var(--text-secondary)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-item{background:var(--bg-primary);border-radius:8px;padding:10px 12px;border:0.5px solid var(--border)}
+.detail-item-label{font-size:11px;font-weight:500;color:var(--text-secondary);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px}
+.detail-item-text{font-size:13px;color:var(--text-primary);line-height:1.5}
+.tool-tag{display:inline-block;font-size:11px;background:var(--bg-tertiary);color:var(--text-secondary);padding:2px 8px;border-radius:4px;margin:2px 2px 2px 0}
+.phase-card[data-phase="0"]{background:#ffcc00;color:#2d4173}
+.phase-card[data-phase="1"]{background:#e85252;color:#fff}
+.phase-card[data-phase="2"]{background:#62c4dd;color:#2d4173}
+.phase-card[data-phase="3"]{background:#2d4173;color:#fff}
+.detail-icon.p0{background:#ffcc00;color:#2d4173}
+.detail-icon.p1{background:#e85252}
+.detail-icon.p2{background:#62c4dd;color:#2d4173}
+.detail-icon.p3{background:#2d4173}
+.footer{max-width:720px;margin:0 auto;padding:1rem 30px;font-size:11px;color:var(--text-secondary);border-top:0.5px solid var(--border)}
+.footer a{color:var(--text-secondary)}
+@media(max-width:500px){.dd-phases{grid-template-columns:1fr 1fr}.detail-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="dd-wrap">
+<p class="dd-title">Designové myšlení a AI</p>
+<p class="dd-sub">Jak zúročit Double Diamond při prototypování s LLM - klikněte na fázi pro detail</p>
+<div class="dd-phases" id="phases"></div>
+<svg width="100%" viewBox="0 0 680 60" style="margin:-8px 0 16px">
+  <g transform="translate(85,30)">
+    <path d="M0,0 L60,-22 L120,0 L60,22 Z" fill="#ffcc00" opacity=".18" stroke="#ffcc00" stroke-width="1"/>
+    <text x="60" y="4" text-anchor="middle" font-size="10" font-weight="500" fill="#ffcc00" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">DISCOVER</text>
+  </g>
+  <g transform="translate(235,30)">
+    <path d="M0,0 L60,-22 L120,0 L60,22 Z" fill="#e85252" opacity=".18" stroke="#e85252" stroke-width="1"/>
+    <text x="60" y="4" text-anchor="middle" font-size="10" font-weight="500" fill="#e85252" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">DEFINE</text>
+  </g>
+  <g transform="translate(385,30)">
+    <path d="M0,0 L60,-22 L120,0 L60,22 Z" fill="#62c4dd" opacity=".18" stroke="#62c4dd" stroke-width="1"/>
+    <text x="60" y="4" text-anchor="middle" font-size="10" font-weight="500" fill="#62c4dd" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">DEVELOP</text>
+  </g>
+  <g transform="translate(535,30)">
+    <path d="M0,0 L60,-22 L120,0 L60,22 Z" fill="#2d4173" opacity=".18" stroke="#2d4173" stroke-width="1"/>
+    <text x="60" y="4" text-anchor="middle" font-size="10" font-weight="500" fill="#2d4173" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">DELIVER</text>
+  </g>
+</svg>
+<div class="detail-panel" id="detail"></div>
+</div>
+<div class="footer">
+  CŽV AI v praxi - KISK FF MUNI, jaro 2026 | Mgr. Kateřina Švidrnochová
+</div>
+<script>
+var data=[
+{num:"01",name:"Discover",label:"Sběr a pochopení",cls:"p0",
+items:[
+{label:"Podklady",text:"Nahrání výzkumných dat, přepisů rozhovorů, empathy map a rešerší do AI nástroje"},
+{label:"Kontext pro AI",text:"Vytvoření Claude Project / Custom GPT s kompletním kontextem projektu"},
+{label:"AI analýza",text:"Identifikace vzorců, klíčových témat a citací z rozhovorů pomocí LLM"},
+{label:"Průzkum řešení",text:"AI-assisted rešerše existujících řešení, konkurence a trendů v oboru"}
+],tools:["Claude Projects","ChatGPT","NotebookLM","Gemini Deep Research","Perplexity"]},
+{num:"02",name:"Define",label:"Instrukce a zadání",cls:"p1",
+items:[
+{label:"POV a HMW",text:"Syntéza zjištění do POV statementu a HMW otázek - vstup pro ideaci i pro AI"},
+{label:"Systémový prompt",text:"Tvorba instructions / system prompt / CLAUDE.md s pravidly, tónem a omezeními"},
+{label:"Knowledge base",text:"Příprava skills, rules files a znalostní báze pro AI asistenta"},
+{label:"PRD dokument",text:"Definice požadavků na prototyp: co má umět, pro koho, jaké jsou hranice"}
+],tools:["Claude Projects","Custom GPTs","Cursor Rules",".cursorrules","CLAUDE.md"]},
+{num:"03",name:"Develop",label:"Návrh a prototyp",cls:"p2",
+items:[
+{label:"Ideace s AI",text:"Brainwriting, SCAMPER, role-play, Crazy 8s - generování a kombinování nápadů"},
+{label:"Journey a blueprint",text:"Customer journey mapa a service blueprint pro návrh zaměřený na uživatele"},
+{label:"Vibecoding",text:"Tvorba funkčního prototypu v přirozeném jazyce: popis - generování - testování - iterace"},
+{label:"Iterativní ladění",text:"Testování po každé změně, paste error messages, postupné rozšiřování funkcionality"}
+],tools:["Lovable","Replit","Bolt.new","Claude Artifacts","Cursor","Figma Make","Macaly"]},
+{num:"04",name:"Deliver",label:"Prezentace a test",cls:"p3",
+items:[
+{label:"Vizuální prezentace",text:"Tvorba prezentace prototypu pomocí AI nástrojů pro sdílení se stakeholdery"},
+{label:"Uživatelské testování",text:"Reální uživatelé testují prototyp - sběr zpětné vazby, identifikace problémů"},
+{label:"Iterace prototypu",text:"Úpravy na základě zpětné vazby - návrat do Develop fáze pro vylepšení"},
+{label:"Reflexe a dokumentace",text:"Popis designových rozhodnutí, porovnání nástrojů, poučení pro další iteraci"}
+],tools:["Claude Artifacts","Gemini Canvas","Gamma AI","Canva AI","GitHub Pages"]}
+];
+var phasesEl=document.getElementById("phases");
+var detailEl=document.getElementById("detail");
+data.forEach(function(d,i){
+var card=document.createElement("div");
+card.className="phase-card"+(i===0?" active":"");
+card.dataset.phase=i;
+card.innerHTML='<div class="phase-num">'+d.num+'</div><div class="phase-name">'+d.name+'</div><div class="phase-label">'+d.label+'</div>';
+card.onclick=function(){
+document.querySelectorAll(".phase-card").forEach(function(c){c.classList.remove("active")});
+card.classList.add("active");
+renderDetail(i);
+};
+phasesEl.appendChild(card);
+});
+function renderDetail(i){
+var d=data[i];
+var html='<div class="detail-header"><div class="detail-icon '+d.cls+'">'+d.num+'</div><div><div class="detail-title">'+d.name+": "+d.label+'</div><div class="detail-subtitle">Fáze Double Diamond aplikovaná na vibecoding workflow</div></div></div><div class="detail-grid">';
+d.items.forEach(function(item){
+html+='<div class="detail-item"><div class="detail-item-label">'+item.label+'</div><div class="detail-item-text">'+item.text+'</div></div>';
+});
+html+='</div><div style="margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border)"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px;font-weight:500">NÁSTROJE</div>';
+d.tools.forEach(function(t){html+='<span class="tool-tag">'+t+'</span>';});
+html+='</div>';
+detailEl.innerHTML=html;
+}
+renderDetail(0);
+</script>
+</body>
+</html>
